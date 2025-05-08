@@ -10,7 +10,8 @@ class SessionsController extends Controller
 {
     public function create()
     {
-        return view('session.login-session');
+        return view('site');
+
     }
 
     public function store()
@@ -23,7 +24,12 @@ class SessionsController extends Controller
         if(Auth::attempt($attributes))
         {
             session()->regenerate();
-            return redirect('dashboard')->with(['success'=>'You are logged in.']);
+            if(Auth::user()->role == "admin"){
+                return redirect('/dashboard')->with(['success'=>'You are logged in.']);
+            }
+            if(Auth::user()->role == "client"){
+                return redirect('/chat')->with(['success'=>'You are logged in.']);
+            }
         }
         else{
 
@@ -36,6 +42,6 @@ class SessionsController extends Controller
 
         Auth::logout();
 
-        return redirect('/login')->with(['success'=>'You\'ve been logged out.']);
+        return redirect('/')->with(['success'=>'You\'ve been logged out.']);
     }
 }

@@ -105,6 +105,20 @@
           </a>
       </li>
 
+      <li class="nav-item">
+        <a class="nav-link {{ (Request::is('restaurants*') ? 'active' : '') }}" href="{{ url('restaurants') }}">
+            <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+                <svg width="12px" height="12px" viewBox="0 0 45 40" xmlns="http://www.w3.org/2000/svg">
+                    <title>Restaurants</title>
+                    <path d="M0 0h45v20H0z" fill="#FFFFFF" class="color-background opacity-6"/>
+                    <path d="M10 25h25v10H10z" fill="#FFFFFF" class="color-background"/>
+                </svg>
+            </div>
+            <span class="nav-link-text ms-1">Restaurants</span>
+        </a>
+    </li>
+    
+
       <li class="nav-link mb-0">
         <a href="https://www.creative-tim.com/product/soft-ui-dashboard-pro-laravel" class="btn btn-primary btn-md active px-5 text-white" target="_blank" role="button" aria-pressed="true">
             Upgrade to PRO</a>

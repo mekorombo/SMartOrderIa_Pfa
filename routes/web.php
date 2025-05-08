@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Password;
@@ -10,9 +11,11 @@ use App\Http\Controllers\CommandeController;
 use App\Http\Controllers\InfoUserController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\SessionsController;
+use App\Http\Controllers\RestaurantController;
 use App\Http\Controllers\ChangePasswordController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\ProduitCommandeController;
+use App\Models\Produit;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,57 +27,43 @@ use App\Http\Controllers\ProduitCommandeController;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
+Route::get('/', [HomeController::class, 'home'])->name("site");
+Route::get('/getProduits',function(){
+    return Produit::select('id','nom', 'prix', 'description')->get();
+});
 
 Route::group(['middleware' => 'auth'], function () {
 
-    Route::get('/', [HomeController::class, 'home']);
-	Route::get('dashboard', function () {
-		return view('dashboard');
-	})->name('dashboard');
-
-	Route::get('billing', function () {
-		return view('billing');
-	})->name('billing');
-
-	Route::get('profile', function () {
-		return view('profile');
-	})->name('profile');
-
-	Route::get('rtl', function () {
-		return view('rtl');
-	})->name('rtl');
-
-	Route::resource('user-management', UserManagementController::class);
-
-
-	Route::get('tables', function () {
-		return view('tables');
-	})->name('tables');
-
-    Route::get('virtual-reality', function () {
-		return view('virtual-reality');
-	})->name('virtual-reality');
-
-    Route::get('static-sign-in', function () {
-		return view('static-sign-in');
-	})->name('sign-in');
-
-    Route::get('static-sign-up', function () {
-		return view('static-sign-up');
-	})->name('sign-up');
-
+    // Route accessible à tous les utilisateurs authentifiés
     Route::get('/logout', [SessionsController::class, 'destroy']);
-	Route::get('/user-profile', [InfoUserController::class, 'create']);
-	Route::post('/user-profile', [InfoUserController::class, 'store']);
-    Route::get('/login', function () {
-		return view('dashboard');
-	})->name('sign-up');
 
-	Route::resource('produits', ProduitController::class);
-	Route::resource('commandes', CommandeController::class);
-	Route::resource('produit_commandes', ProduitCommandeController::class);
-	Route::get('/chat',function(){
+    // Routes spécifiques aux admins
+    Route::group(['middleware' => 'admin'], function () {
+
+        Route::get('dashboard', function () {
+            return view('dashboard');
+        })->name('dashboard');
+
+        Route::get('profile', function () {
+            return view('profile');
+        })->name('profile');
+
+        Route::resource('user-management', UserManagementController::class);
+        Route::resource('produits', ProduitController::class);
+        Route::resource('commandes', CommandeController::class);
+        Route::resource('restaurants', RestaurantController::class);
+
+
+        
+
+        Route::get('/user-profile', [InfoUserController::class, 'create']);
+        Route::post('/user-profile', [InfoUserController::class, 'store']);
+
+        Route::get('/login', function () {
+            return view('dashboard');
+        })->name('sign-up');
+    });
+	Route::get('/chat', function () {
 		return view('chat');
 	});
 });
