@@ -25,7 +25,7 @@
             <div class="head-right">
                 @php
                 if(Auth::user()){
-                    echo"<a href='/chat'>ChatBot</a>
+                    echo"<a href='#botChosis'>ChatBot</a>
                         <div class='button-box'>
                             <button id=''><a href='/logout'>Logout </a></button>
                         </div>";
@@ -302,13 +302,12 @@
         
             <h1 class="title">Simple Pricing for Smarter Restaurant Automation</h1>
         
-            <div class="pricing-container">
-        
+            <div class="pricing-container" id="botChosis">
                 <div class="price-box">
                     <h1>Starter</h1>
                     <h2>Basic AI chatbot with table booking</h2>
                     <h3>$0</h3>
-                    <button>GET STARTED</button>
+                    <a href="/chatScrach" class="btn">GET STARTED</a>
         
                     <p><img src="images/Check circle.png" alt=""> Table reservation via chatbot</p>
                     <p><img src="images/Check circle.png" alt=""> Basic order handling</p>
@@ -319,7 +318,7 @@
                     <h1>Professional</h1>
                     <h2>Advanced features with analytics & product ordering</h2>
                     <h3>$9.99</h3>
-                    <button>GET STARTED</button>
+                    <a href="/chatollama" class="btn">GET STARTED</a>
         
                     <p><img src="images/Check circle.png" alt=""> Real-time product order flow</p>
                     <p><img src="images/Check circle.png" alt=""> Reservation + command logging in MySQL</p>

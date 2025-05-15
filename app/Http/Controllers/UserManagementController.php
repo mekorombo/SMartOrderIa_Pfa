@@ -29,74 +29,86 @@ class UserManagementController extends Controller
      * Enregistrer un nouvel utilisateur.
      */
     public function store(Request $request)
+{
+    $validatedData = $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|unique:users,email',
+        'password' => 'required|min:6|confirmed',
+        'role' => 'required|in:User,Admin',
+        'phone' => 'nullable|numeric',
+        'location' => 'nullable|string|max:255',
+        'about_me' => 'nullable|string|max:500',
+    ]);
+
+    $user = new User();
+    $user->name = $validatedData['name'];
+    $user->email = $validatedData['email'];
+    $user->password = Hash::make($validatedData['password']);
+    $user->role = $validatedData['role'];
+    $user->phone = $validatedData['phone'] ?? null;
+    $user->location = $validatedData['location'] ?? null;
+    $user->about_me = $validatedData['about_me'] ?? null;
+
+    $user->save();
+
+    return redirect()->route('user-management.index')->with('success', 'Utilisateur créé avec succès.');
+}
+/**
+     * Mettre à jour un utilisateur existant.
+     */
+    public function update(Request $request, User $user_management)
     {
+        $user_management->role = $request->role ; 
+        $user_management->save();
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:6|confirmed',
+            'email' => 'required|email|unique:users,email,' . $user_management->id,
+            'password' => 'nullable|min:6|confirmed',
             'phone' => 'nullable|numeric',
             'location' => 'nullable|string|max:255',
             'about_me' => 'nullable|string|max:500',
         ]);
-
-        User::create([
+    
+        $data = [
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
             'phone' => $request->phone,
             'location' => $request->location,
             'about_me' => $request->about_me,
-        ]);
-
-        return redirect()->route('user-management.index')->with('success', 'Utilisateur créé avec succès.');
+        ];
+    
+        if ($request->filled('password')) {
+            $data['password'] = Hash::make($request->password);
+        }
+    
+        $user_management->update($data);
+    
+        return redirect()->route('user-management.index')->with('success', 'Utilisateur mis à jour avec succès.');
     }
-
     /**
      * Afficher un utilisateur spécifique.
      */
-    public function show(User $user)
+    public function show(User $user_management)
     {
-        return view('usermanagement.show', compact('user'));
+        return view('usermanagement.show', compact('user_management'));
     }
 
     /**
      * Afficher le formulaire d'édition d'un utilisateur.
      */
-    public function edit(User $user)
+    public function edit(User $user_management)
     {
-        return view('usermanagement.edit', compact('user'));
+        return view('usermanagement.edit', compact('user_management'));
     }
 
-    /**
-     * Mettre à jour un utilisateur existant.
-     */
-    public function update(Request $request, User $user)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'phone' => 'nullable|numeric',
-            'location' => 'nullable|string|max:255',
-            'about_me' => 'nullable|string|max:500',
-        ]);
-
-        $user->update([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'location' => $request->location,
-            'about_me' => $request->about_me,
-        ]);
-
-        return redirect()->route('user-management.index')->with('success', 'Utilisateur mis à jour avec succès.');
-    }
+    
 
     /**
      * Supprimer un utilisateur.
      */
-    public function destroy(User $user)
+    public function destroy(User $user_management)
     {
-        $user->delete();
+        $user_management->delete();
         return redirect()->route('user-management.index')->with('success', 'Utilisateur supprimé avec succès.');
     }
 }

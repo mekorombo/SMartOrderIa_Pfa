@@ -28,7 +28,7 @@ class SessionsController extends Controller
                 return redirect('/dashboard')->with(['success'=>'You are logged in.']);
             }
             if(Auth::user()->role == "client"){
-                return redirect('/chat')->with(['success'=>'You are logged in.']);
+                return redirect('/')->with(['success'=>'You are logged in.']);
             }
         }
         else{

@@ -1,5 +1,8 @@
 <?php
 
+use App\Models\Produit;
+use App\Models\Restaurant;
+use App\Models\Reservation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -15,7 +18,6 @@ use App\Http\Controllers\RestaurantController;
 use App\Http\Controllers\ChangePasswordController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\ProduitCommandeController;
-use App\Models\Produit;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,7 +33,10 @@ Route::get('/', [HomeController::class, 'home'])->name("site");
 Route::get('/getProduits',function(){
     return Produit::select('id','nom', 'prix', 'description')->get();
 });
-
+Route::get('/getRestaurants',function(){
+    return Restaurant::select('*')->get();
+});
+Route::resource('commandes', CommandeController::class);
 Route::group(['middleware' => 'auth'], function () {
 
     // Route accessible à tous les utilisateurs authentifiés
@@ -52,10 +57,7 @@ Route::group(['middleware' => 'auth'], function () {
         Route::resource('produits', ProduitController::class);
         Route::resource('commandes', CommandeController::class);
         Route::resource('restaurants', RestaurantController::class);
-
-
         
-
         Route::get('/user-profile', [InfoUserController::class, 'create']);
         Route::post('/user-profile', [InfoUserController::class, 'store']);
 
@@ -63,8 +65,11 @@ Route::group(['middleware' => 'auth'], function () {
             return view('dashboard');
         })->name('sign-up');
     });
-	Route::get('/chat', function () {
-		return view('chat');
+	Route::get('/chatollama', function () {
+		return view('chatollama');
+	});
+    Route::get('/chatScrach', function () {
+		return view('chatScrach');
 	});
 });
 

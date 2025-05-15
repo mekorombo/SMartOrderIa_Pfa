@@ -60,8 +60,9 @@
     <section class="chats"></section>
 
     <section class="prompt">
-        <form action="#" class="prompt__form" novalidate>
+        <form action="#" class="prompt__form" novalidate method="post">
             <div class="prompt__input-wrapper">
+                <input type="hidden" name="user_id" value="{{ Auth::user()->id }}">
                 <input type="text" placeholder="Enter a prompt here" class="prompt__form-input" required>
                 <button class="prompt__form-button" id="sendButton">
                     <i class='bx bx-send'></i>
@@ -80,7 +81,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <script src="{{ asset('js/script.js') }}"></script>
+    <script src="{{ asset('js/scriptR.js') }}"></script>
 </body>
 
 </html>

@@ -2,8 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Produit;
 use App\Models\Commande;
 use Illuminate\Http\Request;
+use App\Models\ProduitCommande;
+use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class CommandeController extends Controller
 {
@@ -28,16 +33,41 @@ class CommandeController extends Controller
      * Enregistrer une nouvelle commande.
      */
     public function store(Request $request)
-    {
-        $request->validate([
-            'user_id' => 'required|integer',
-            'total' => 'required|numeric',
-        ]);
+        {
+            DB::beginTransaction();
+    try {
+        // 🧮 Calcul du total de la commande
+        $total = 0;
+        foreach ($request->produits as $p) {
+            $produit = \App\Models\Produit::find($p['produit_id']);
+            if ($produit) {
+                $total += $produit->prix * $p['quantite'];
+            }
+        }
 
-        Commande::create($request->all());
+        // 🧾 Création de la commande
+        $commande = new Commande();
+        $commande->user_id=$request->input('id');
+        $commande->total = $total;
+        $commande->save();
 
-        return redirect()->route('commandes.index')->with('succes', 'Commande créée avec succès.');
+        // 🧺 Ajout des produits à la commande
+        foreach ($request->produits as $p) {
+            $produitCommande = new ProduitCommande();
+            $produitCommande->commande_id = $commande->id;
+            $produitCommande->produit_id = $p['produit_id'];
+            $produitCommande->qte = $p['quantite'];
+            $produitCommande->save();
+        }
+
+        DB::commit();
+        return response()->json(['success' => true, 'message' => 'Commande enregistrée avec succès !']);
+    } catch (\Exception $e) {
+        DB::rollback();
+        return response()->json(['success' => false, 'message' => 'Erreur : ' . $e->getMessage()], 500);
     }
+        }
+
 
     /**
      * Afficher une commande spécifique.

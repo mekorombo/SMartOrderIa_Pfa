@@ -17,7 +17,7 @@ return new class extends Migration
             $table->decimal('prix', 10, 2);
             $table->integer('qte');
             $table->text('description')->nullable();
-            $table->timestamps(); // created_at et updated_at
+            $table->timestamps(); 
         });
     }
 

@@ -29,7 +29,6 @@
                             <thead>
                                 <tr>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">ID</th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Photo</th>
                                     <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Name</th>
                                     <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Email</th>
                                     <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Role</th>
@@ -44,11 +43,6 @@
                                     <td class="ps-4">
                                         <p class="text-xs font-weight-bold mb-0">{{ $user->id }}</p>
                                     </td>
-                                    <td>
-                                        <div>
-                                            <img src="{{ asset('assets/img/default-avatar.png') }}" class="avatar avatar-sm me-3" alt="user image">
-                                        </div>
-                                    </td>
                                     <td class="text-center">
                                         <p class="text-xs font-weight-bold mb-0">{{ $user->name }}</p>
                                     </td>
@@ -56,16 +50,16 @@
                                         <p class="text-xs font-weight-bold mb-0">{{ $user->email }}</p>
                                     </td>
                                     <td class="text-center">
-                                        <p class="text-xs font-weight-bold mb-0">User</p>
+                                        <p class="text-xs font-weight-bold mb-0">{{ $user->role }}</p>
                                     </td>
                                     <td class="text-center">
                                         <span class="text-secondary text-xs font-weight-bold">{{ $user->created_at->format('d/m/Y') }}</span>
                                     </td>
                                     <td class="text-center">
-                                        <a href="{{ route('user-management.edit', $user->id) }}" class="mx-3" data-bs-toggle="tooltip" data-bs-original-title="Edit user">
+                                        <a href="{{ route('user-management.show', ['user_management' => $user->id]) }}" class="mx-3" data-bs-toggle="tooltip" data-bs-original-title="Edit user">
                                             <i class="fas fa-user-edit text-secondary"></i>
                                         </a>
-                                        <form action="{{ route('user-management.destroy', $user->id) }}" method="POST" style="display:inline;">
+                                        <form action="{{ route('user-management.destroy', ['user_management' => $user->id]) }}" method="POST" style="display:inline;">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="border-0 bg-transparent p-0" onclick="return confirm('Confirmer la suppression ?')">
