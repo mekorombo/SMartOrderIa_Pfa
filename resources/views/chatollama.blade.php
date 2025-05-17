@@ -24,7 +24,7 @@
         <div class="suggests">
             <div class="suggests__item">
                 <p class="suggests__item-text">
-                    Give tips on helping kids finish their homework on time
+                   Je veux commander des produits 
                 </p>
                 <div class="suggests__item-icon">
                     <i class='bx bx-stopwatch'></i>
@@ -32,7 +32,7 @@
             </div>
             <div class="suggests__item">
                 <p class="suggests__item-text">
-                    Help me write an out-of-office email
+                    Je veux Réserver
                 </p>
                 <div class="suggests__item-icon">
                     <i class='bx bx-edit-alt'></i>
@@ -40,20 +40,13 @@
             </div>
             <div class="suggests__item">
                 <p class="suggests__item-text">
-                    Give me phrases to learn a new language
+                    Afficher les produits
                 </p>
                 <div class="suggests__item-icon">
                     <i class='bx bx-compass'></i>
                 </div>
             </div>
-            <div class="suggests__item">
-                <p class="suggests__item-text">
-                    Show me how to build something by hand
-                </p>
-                <div class="suggests__item-icon">
-                    <i class='bx bx-wrench'></i>
-                </div>
-            </div>
+            
         </div>
     </header>
 

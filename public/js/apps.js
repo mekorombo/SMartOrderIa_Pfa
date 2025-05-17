@@ -86,3 +86,44 @@ RegisternButtonAlt.addEventListener('click', function(){
     signinPage.classList.remove('openSignin');
     signinPage.classList.add('closeSignin');
 });
+
+// Récupération des éléments
+const formSignin = document.getElementById('signinPage');
+const formRegister = document.getElementById('RegisterPage');
+
+// Nouveaux boutons
+const btnOpenRegister = document.getElementById('btn-open-register');
+const btnOpenSignin = document.getElementById('btn-open-signin');
+
+// Boutons de fermeture
+const closeSignin = document.getElementById('closeIcon');
+const closeRegister = document.getElementById('closeIconR');
+
+// Ouvre le formulaire d'inscription
+btnOpenRegister?.addEventListener('click', function(e) {
+    e.preventDefault();
+    formRegister.classList.remove('closeSignin');
+    formRegister.classList.add('openSignin');
+    formSignin.classList.remove('openSignin');
+    formSignin.classList.add('closeSignin');
+});
+
+// Ouvre le formulaire de connexion
+btnOpenSignin?.addEventListener('click', function() {
+    formSignin.classList.remove('closeSignin');
+    formSignin.classList.add('openSignin');
+    formRegister.classList.remove('openSignin');
+    formRegister.classList.add('closeSignin');
+});
+
+// Fermer le formulaire de connexion
+closeSignin?.addEventListener('click', function() {
+    formSignin.classList.remove('openSignin');
+    formSignin.classList.add('closeSignin');
+});
+
+// Fermer le formulaire d'inscription
+closeRegister?.addEventListener('click', function() {
+    formRegister.classList.remove('openSignin');
+    formRegister.classList.add('closeSignin');
+});

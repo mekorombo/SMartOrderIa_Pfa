@@ -7,7 +7,7 @@
 
     <ul class="list-group mb-4">
         <li class="list-group-item"><strong>Client :</strong> {{ $commande->user->name }}</li>
-        <li class="list-group-item"><strong>Total :</strong> {{ $commande->total }} €</li>
+        <li class="list-group-item"><strong>Total :</strong> {{ $commande->total }} dhs</li>
     </ul>
 
     <h3>Produits commandés :</h3>

@@ -15,69 +15,75 @@
 </head>
 <body>
     <div class="container">
-        <header>
-            <div class="head-left">
-                <img src="images/logo.png" alt="logo">
-                <h1>SMARORDERAI</h1>
+       <header>
+    <div class="head-left">
+        <img src="images/logo.png" alt="logo">
+        <h1>SMARTORDERAI</h1>
+    </div>
+
+    <ul>
+        <li><a href="#home-section">Home</a></li>
+        <li><a href="#Service-section">Services</a></li>
+        <li><a href="#pricing-section">Pricing</a></li>
+    </ul>
+    
+    <div class="head-right">
+        @auth
+            <a href="#botChosis">ChatBot</a>
+            <div class="button-box">
+                <a href="/logout"><button>Logout</button></a>
             </div>
-
-            {{-- <ul>
-                <li><a href="#">FRATURES</a></li>
-                <li><a href="#">PRICING</a></li>
-                <li><a href="#">HOW TO USE</a></li>
-                <li><a href="#">RODEMAP</a></li>
-            </ul> --}}
-            
-            <div class="head-right">
-                @php
-                if(Auth::user()){
-                    echo"<a href='#botChosis'>ChatBot</a>
-                        <div class='button-box'>
-                            <button id=''><a href='/logout'>Logout </a></button>
-                        </div>";
-                }else{
-                    echo '<a href="#" id="RegisternButton">NEW ACOUNT</a>
-                        <div class="button-box">
-                            <button id="signinButton">SIGN IN</button>
-                        </div>';
-                }
-                @endphp
-                
-            </div>
-
-            <div class="menu-icon">
-                <i class='bx bx-menu'></i>
-            </div>
-        </header>
-        
-
-        <div class="sidebar">
-            <div class="close-icon">
-                <i class='bx bx-x'></i>
-            </div>
-
-            <ul>
-                <li><a href="#">FRATURES</a></li>
-                <li><a href="#">PRICING</a></li>
-                <li><a href="#">HOW TO USE</a></li>
-                <li><a href="#">RODEMAP</a></li>
-            </ul>
-
-            <div class="social-sidebar">
-                <a href="#"><i class='bx bxl-discord-alt' ></i></a>
-                <a href="#"><i class='bx bxl-youtube' ></i></a>
-                <a href="#"><i class='bx bxl-github' ></i></a>
-                <a href="#"><i class='bx bxl-linkedin-square' ></i></a>
-            </div>
-
+        @else
+            <a href="#" id="RegisternButton">NEW ACCOUNT</a>
             <div class="button-box">
                 <button id="signinButton">SIGN IN</button>
             </div>
+        @endauth
+    </div>
 
-        </div>
+    <div class="menu-icon">
+        <i class='bx bx-menu'></i>
+    </div>
+</header>
+
+<div class="sidebar">
+    <div class="close-icon">
+        <i class='bx bx-x'></i>
+    </div>
+
+    <ul>
+        <li><a href="#home-section">Home</a></li>
+        <li><a href="#Service-section">Services</a></li>
+        <li><a href="#pricing-section">Pricing</a></li>
+    </ul>
+
+    <div class="social-sidebar">
+        <a href="#"><i class='bx bxl-discord-alt'></i></a>
+        <a href="#"><i class='bx bxl-youtube'></i></a>
+        <a href="#"><i class='bx bxl-github'></i></a>
+        <a href="#"><i class='bx bxl-linkedin-square'></i></a>
+    </div>
+
+    @auth
+    <div class="button-box">
+        <a href="#botChosis" id="btn-chatbot"><button>ChatBot</button></a>
+    </div>
+    <div class="button-box">
+        <a href="/logout" id="btn-logout"><button>Logout</button></a>
+    </div>
+@else
+    <div class="button-box">
+        <a href="#" id="btn-open-register"><button>New Account</button></a>
+    </div>
+    <div class="button-box">
+        <button id="btn-open-signin">Sign In</button>
+    </div>
+@endauth
+</div>
 
 
-        <section class="hero">
+
+        <section class="hero" id="home-section">
             <img class="hero-blur-image" src="images/hero blur img.png" alt="">
             <img class="hero-icons-image parallax" data-speed="4" src="images/hero icons img.png" alt="">
             <img class="hero-rings-image" src="images/hero rings icon.png" alt="">
@@ -180,7 +186,7 @@
 
 
 
-        <section class="features-section">
+        <section class="features-section" id="Service-section">
             <h1>Book & Order Smarter with SMARORDERAI</h1>
         
             <div class="features-gradient"></div>
@@ -331,7 +337,7 @@
         </section>
         
 
-        <section class="pricing-section">
+        <section class="pricing-section" id="pricing-section">
             <div class="pricing-img-box">
                 <img class="parallax" data-speed="4" src="images/pricing-parallax.png" alt="">
                 <img src="images/magical-glob.png" alt="">
@@ -344,7 +350,9 @@
                     <h1>Starter</h1>
                     <h2>Basic AI chatbot with table booking</h2>
                     <h3>$0</h3>
-                    <a href="/chatScrach" class="btn">GET STARTED</a>
+                    <button><a href="/chatScrach" class="h5" style="text-decoration: none">GET STARTED</a></button>
+
+                    
         
                     <p><img src="images/Check circle.png" alt=""> Table reservation via chatbot</p>
                     <p><img src="images/Check circle.png" alt=""> Basic order handling</p>
@@ -355,7 +363,8 @@
                     <h1>Professional</h1>
                     <h2>Advanced features with analytics & product ordering</h2>
                     <h3>$9.99</h3>
-                    <a href="/chatollama" class="btn">GET STARTED</a>
+                    <button><a href="/chatollama" style="text-decoration: none" class="h5">GET STARTED</a></button>
+                    
         
                     <p><img src="images/Check circle.png" alt=""> Real-time product order flow</p>
                     <p><img src="images/Check circle.png" alt=""> Reservation + command logging in MySQL</p>
@@ -366,7 +375,7 @@
                     <h1>Enterprise</h1>
                     <h2>Custom chatbot with full control & priority support</h2>
                     <h3>$99.99</h3>
-                    <button>GET STARTED</button>
+                    <button class="h5 "  >GET STARTED</button>
         
                     <p><img src="images/Check circle.png" alt=""> Dedicated instance with your branding</p>
                     <p><img src="images/Check circle.png" alt=""> Priority technical support & SLAs</p>
@@ -410,7 +419,7 @@
             </div>
 
             <div class="button-box">
-                <button>OUR ROADMAP</button>
+                <button>SMARORDERAI</button>
             </div>
 
             <div class="roadmap-gradient"></div>
@@ -432,56 +441,59 @@
 
     </div>
     
-    <script src="/js/apps.js"></script>
-    @if(isset($emailNotVerified) && $emailNotVerified)
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        Swal.fire({
-            icon: "error",
-            title: "Vérification requise",
-            text: "Vous devez vérifier votre adresse email pour accéder au chat.",
-            footer: '<a href="{{ route("email.verification.resend") }}" style="color: #3085d6;">Renvoyer le lien de vérification</a>'
-        });
-    </script>
+<script src="/js/apps.js"></script>
+
+@if(isset($emailNotVerified) && $emailNotVerified)
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    Swal.fire({
+        icon: "error",
+        title: "Verification Required",
+        text: "You must verify your email address to access the chat.",
+        footer: '<a href="{{ route("email.verification.resend") }}" style="color: #3085d6;">Resend verification link</a>'
+    });
+</script>
 @endif
+
 @if(session('email_verified'))
-    <script>
-        Swal.fire({
-            icon: "success",
-            title: "Email vérifié ✅",
-            text: "Votre adresse email a été vérifiée avec succès. Bienvenue !"
-        });
-    </script>
+<script>
+    Swal.fire({
+        icon: "success",
+        title: "Email Verified ✅",
+        text: "Your email address has been successfully verified. Welcome!"
+    });
+</script>
 @endif
 
 @if(session('email_already_verified'))
-    <script>
-        Swal.fire({
-            icon: "info",
-            title: "Déjà vérifié",
-            text: "Votre adresse email a déjà été vérifiée."
-        });
-    </script>
-    
-    @endif
-    @if(session('verification_resent'))
-    <script>
-        Swal.fire({
-            icon: "success",
-            title: "Lien envoyé 📩",
-            text: "Un nouveau lien de vérification a été envoyé à votre adresse email."
-        });
-    </script>
+<script>
+    Swal.fire({
+        icon: "info",
+        title: "Already Verified",
+        text: "Your email address has already been verified."
+    });
+</script>
+@endif
+
+@if(session('verification_resent'))
+<script>
+    Swal.fire({
+        icon: "success",
+        title: "Link Sent 📩",
+        text: "A new verification link has been sent to your email address."
+    });
+</script>
 @endif
 
 @if(session('email_already_verified'))
-    <script>
-        Swal.fire({
-            icon: "info",
-            title: "Déjà vérifié",
-            text: "Votre adresse email est déjà vérifiée."
-        });
-    </script>
+<script>
+    Swal.fire({
+        icon: "info",
+        title: "Already Verified",
+        text: "Your email is already verified."
+    });
+</script>
 @endif
+
 </body>
 </html>

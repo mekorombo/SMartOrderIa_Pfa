@@ -23,7 +23,7 @@ class EmailVerificationMail extends Mailable
         $verificationUrl = route('email.verify', ['id' => $this->user->id]); // à sécuriser + tard avec un token
 
         return $this->subject('Vérifiez votre adresse email')
-                    ->view('emails.verify1')
+                    ->view('emails.verify2')
                     ->with([
                         'name' => $this->user->name,
                         'verificationUrl' => $verificationUrl,

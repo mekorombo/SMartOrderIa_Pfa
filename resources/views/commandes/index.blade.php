@@ -48,7 +48,7 @@
             <p class="text-xs font-weight-bold mb-0">{{ $commande->user->name }}</p>
         </td>
         <td class="text-center">
-            <p class="text-xs font-weight-bold mb-0">{{ $commande->total }} €</p>
+            <p class="text-xs font-weight-bold mb-0">{{ $commande->total }} dhs</p>
         </td>
         <td class="text-center">
             <a href="{{ route('commandes.show', $commande->id) }}" class="mx-2" data-bs-toggle="tooltip" data-bs-original-title="Voir la commande">
