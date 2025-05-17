@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
+use App\Jobs\SendEmailVerificationJob;
 
 class RegisterController extends Controller
 {
@@ -20,7 +21,6 @@ class RegisterController extends Controller
             'name' => ['required', 'max:50'],
             'email' => ['required', 'email', 'max:50', Rule::unique('users', 'email')],
             'password' => ['required', 'min:5', 'max:20'],
-            'agreement' => ['accepted']
         ]);
         $attributes['password'] = bcrypt($attributes['password'] );
 
@@ -28,6 +28,7 @@ class RegisterController extends Controller
 
         session()->flash('success', 'Your account has been created.');
         $user = User::create($attributes);
+        SendEmailVerificationJob::dispatch($user);
         Auth::login($user); 
         return redirect('/dashboard');
     }

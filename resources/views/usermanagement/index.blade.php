@@ -40,7 +40,7 @@
                             <tbody>
                                 @foreach ($users as $user)
                                 <tr>
-                                    <td class="ps-4">
+                                    <td class="ps-4 text-center">
                                         <p class="text-xs font-weight-bold mb-0">{{ $user->id }}</p>
                                     </td>
                                     <td class="text-center">
@@ -70,8 +70,11 @@
                                 </tr>
                                 @endforeach
                             </tbody>
-
                         </table>
+                                                                                                <div class="d-flex justify-content-center mt-3">
+                        {{ $users->links() }}
+
+</div>
                     </div>
                 </div>
             </div>

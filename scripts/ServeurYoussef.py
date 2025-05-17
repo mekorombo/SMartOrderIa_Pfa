@@ -44,7 +44,7 @@ def chat():
         cursor.execute("SELECT nom FROM restaurants")
         restaurants = cursor.fetchall()
         if restaurants:
-            response += "🍽️ Voici les restaurants disponibles :\n"
+            response += "🍽️ Voici les restaurants disponibles  :\n"
             for idx, (nom,) in enumerate(restaurants, start=1):
                 response += f"{idx}. {nom}\n"
         else:

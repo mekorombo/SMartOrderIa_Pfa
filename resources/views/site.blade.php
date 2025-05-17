@@ -5,7 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SMARORDERAI</title>
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <link rel="icon" type="image/png" href="../assets/img/logo-ct.png">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .closeSignin { display: none; }
+.openSignin { display: block; }
+</style>
 </head>
 <body>
     <div class="container">
@@ -30,7 +36,7 @@
                             <button id=''><a href='/logout'>Logout </a></button>
                         </div>";
                 }else{
-                    echo '<a href="#">NEW ACOUNT</a>
+                    echo '<a href="#" id="RegisternButton">NEW ACOUNT</a>
                         <div class="button-box">
                             <button id="signinButton">SIGN IN</button>
                         </div>';
@@ -124,24 +130,55 @@
             </div>
         </section>
         
-        <form role="form" method="POST" action="/session"id="signinPage" class="signin-page-box">
-            <div class="signin-page">
-                    @csrf
-                <h1>Sign In</h1>
-                {{-- <input type="text" placeholder="User Name"> --}}
-                <input type="text" name="email" id="email" placeholder="Email">
-                @error('email')
-                        <p class="text-danger text-xs mt-2">{{ $message }}</p>
-                @enderror
-                <input type="text"  name="password" id="password" placeholder="Password">
-                @error('password')
-                    <p class="text-danger text-xs mt-2">{{ $message }}</p>
-                @enderror
-                <button type="submit">Sign in</button>
-                <a >Register</a>
-                <div id="closeIcon"><i class='bx bx-x'></i></div>
-            </div>
-        </form>
+<form role="form" method="POST" action="/session" id="signinPage" class="signin-page-box closeSignin">
+    <div class="signin-page">
+        @csrf
+        <h1>Sign In</h1>
+        <input type="text" name="email" id="email" placeholder="Email">
+        @error('email')
+            <p class="text-danger text-xs mt-2">{{ $message }}</p>
+        @enderror
+        <input type="password" name="password" id="password" placeholder="Password">
+        @error('password')
+            <p class="text-danger text-xs mt-2">{{ $message }}</p>
+        @enderror
+        <button type="submit">Sign in</button>
+        <a href="#" id="RegisternButtonAlt">New Account</a>
+        <div id="closeIcon"><i class='bx bx-x'></i></div>
+    </div>
+</form>
+
+<!-- Register Form -->
+<form role="form" method="POST" action="/register" id="RegisterPage" class="signin-page-box closeSignin">
+    <div class="signin-page">
+        @csrf
+        <h1>Register</h1>
+
+        <input type="text" name="name" placeholder="Name" value="{{ old('name') }}">
+        @error('name')
+            <p class="text-danger text-xs mt-2">{{ $message }}</p>
+        @enderror
+
+        <input type="text" name="email" placeholder="Email" value="{{ old('email') }}">
+        @error('email')
+            <p class="text-danger text-xs mt-2">{{ $message }}</p>
+        @enderror
+
+        <input type="password" name="password" placeholder="Password">
+        @error('password')
+            <p class="text-danger text-xs mt-2">{{ $message }}</p>
+        @enderror
+
+        <!-- ✅ Case à cocher Terms -->
+
+        <button type="submit">Register</button>
+
+        <a href="#" id="signinButtonAlt">Sign in</a>
+        <div id="closeIconR"><i class='bx bx-x'></i></div>
+    </div>
+</form>
+
+
 
         <section class="features-section">
             <h1>Book & Order Smarter with SMARORDERAI</h1>
@@ -396,5 +433,55 @@
     </div>
     
     <script src="/js/apps.js"></script>
+    @if(isset($emailNotVerified) && $emailNotVerified)
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        Swal.fire({
+            icon: "error",
+            title: "Vérification requise",
+            text: "Vous devez vérifier votre adresse email pour accéder au chat.",
+            footer: '<a href="{{ route("email.verification.resend") }}" style="color: #3085d6;">Renvoyer le lien de vérification</a>'
+        });
+    </script>
+@endif
+@if(session('email_verified'))
+    <script>
+        Swal.fire({
+            icon: "success",
+            title: "Email vérifié ✅",
+            text: "Votre adresse email a été vérifiée avec succès. Bienvenue !"
+        });
+    </script>
+@endif
+
+@if(session('email_already_verified'))
+    <script>
+        Swal.fire({
+            icon: "info",
+            title: "Déjà vérifié",
+            text: "Votre adresse email a déjà été vérifiée."
+        });
+    </script>
+    
+    @endif
+    @if(session('verification_resent'))
+    <script>
+        Swal.fire({
+            icon: "success",
+            title: "Lien envoyé 📩",
+            text: "Un nouveau lien de vérification a été envoyé à votre adresse email."
+        });
+    </script>
+@endif
+
+@if(session('email_already_verified'))
+    <script>
+        Swal.fire({
+            icon: "info",
+            title: "Déjà vérifié",
+            text: "Votre adresse email est déjà vérifiée."
+        });
+    </script>
+@endif
 </body>
 </html>

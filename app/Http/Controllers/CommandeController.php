@@ -17,7 +17,7 @@ class CommandeController extends Controller
      */
     public function index()
     {
-        $commandes = Commande::all();
+        $commandes = Commande::paginate(10);
         return view('commandes.index', compact('commandes'));
     }
 

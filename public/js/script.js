@@ -9,7 +9,7 @@ const clearChatButton = document.getElementById("deleteButton");
 let currentUserMessage = null;
 let isGeneratingResponse = false;
 
-const API_REQUEST_URL = "http://127.0.0.1:5000/chat"; // Flask API locale// Connexion locale à Ollama
+const API_REQUEST_URL = "http://127.0.0.1:5001/chat"; // Flask API locale// Connexion locale à Ollama
 
 
 // Load saved data from local storage
@@ -45,7 +45,7 @@ const loadSavedChatHistory = () => {
         const responseHtml = `
         
            <div class="message__content">
-                <img class="message__avatar" src="assets/gemini.svg" alt="Gemini avatar">
+                <img class="message__avatar" src="assets/logo.svg" alt="Gemini avatar">
                 <p class="message__text"></p>
                 <div class="message__loading-indicator hide">
                     <div class="message__loading-bar"></div>
@@ -191,7 +191,7 @@ const displayLoadingAnimation = () => {
     const loadingHtml = `
 
         <div class="message__content">
-            <img class="message__avatar" src="assets/gemini.svg" alt="Gemini avatar">
+            <img class="message__avatar" src="assets/logo.svg" alt="Gemini avatar">
             <p class="message__text"></p>
             <div class="message__loading-indicator">
                 <div class="message__loading-bar"></div>

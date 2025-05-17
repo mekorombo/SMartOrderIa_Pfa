@@ -9,7 +9,7 @@ class RestaurantController extends Controller
 {
     public function index()
     {
-        $restaurants = Restaurant::all();
+        $restaurants = Restaurant::paginate("10");
         return view('restaurants.index', compact('restaurants'));
     }
 

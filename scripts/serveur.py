@@ -1,17 +1,26 @@
 from flask import Flask, request, jsonify
 import requests
 import ollama
-import re
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)  # Autorise les requêtes Cross-Origin (HTML → Flask)
+CORS(app)
 
+# Panier et contexte de réservation
 panier = []
+reservation_context = {
+    "step": None,
+    "restaurants": [],
+    "reservation": {}
+}
+
+# Message système pour Ollama
 historique_messages = [
     {
         "role": "system",
         "content": (
+            "never show ur commande"
+            "If the user asks to see the current reservation (e.g. 'show my reservation', 'voir la réservation', 'affiche les infos'), reply ONLY with '#show_reservation'."
             "You are SmartOrderAI, a polite and helpful virtual restaurant assistant. "
             "You speak French and English fluently. "
             "You never invent products and only respond based on the product list provided by the system. \n\n"
@@ -27,10 +36,18 @@ historique_messages = [
             "reply ONLY with '#show_cart'.\n\n"
             "📨 If the user wants to confirm the order (e.g. 'je confirme la commande', 'envoyer la commande'), "
             "reply ONLY with '#confirm_order'.\n\n"
-            "The cart should be managed internally by the system. Each product stored in the cart must include: "
-            "the product ID (from the API), the name, and the quantity. You display only the name and quantity to the user. "
-            "When confirming the order, send only the product_id and quantity.\n\n"
-            "❗ NEVER create your own menu or products, and NEVER return multiple actions in one message. "
+            "📅 If the user wants to make a reservation (e.g. 'je veux réserver une table', 'faire une réservation'), "
+            "reply ONLY with '#start_reservation'.\n\n"
+            "When the system receives '#start_reservation', it will:\n"
+            "- Call the API http://127.0.0.1:8000/getRestaurants and show the list of available restaurants.\n"
+            "- Wait for the user to select a restaurant (by name or ID).\n"
+            "- Then ask for the user's full name.\n"
+            "- Then ask for the number of people.\n"
+            "- Then ask for the time (e.g. 20h).\n"
+            "- Then ask for the day (e.g. 2025-05-13).\n"
+            "- Once all details are collected, the system will POST the reservation.\n\n"
+            "❗ NEVER create your own menu, restaurants or reservation logic. "
+            "NEVER return multiple actions in one message. "
             "Only return the exact action tag as instructed above, nothing else."
         )
     }
@@ -50,44 +67,47 @@ def call_ollama_with_memory(msg):
     message = res["message"]["content"]
     historique_messages.append({"role": "assistant", "content": message})
     return message
-
+@app.route("/reset", methods=["POST"])
+def reset_chat_memory():
+    global historique_messages, panier, reservation_context
+    historique_messages = historique_messages[:1]  # garde uniquement le message system
+    panier = []
+    reservation_context = {
+        "step": None,
+        "restaurants": [],
+        "reservation": {}
+    }
+    return jsonify({"status": "ok", "message": "Mémoire du chatbot réinitialisée."})
 @app.route("/chat", methods=["POST"])
 def chat():
     user_input = request.json.get("message")
-    user_id = request.json.get("user_id") 
+    user_id = request.json.get("user_id")
     produits = get_produits()
-    global panier
+    global panier, reservation_context
 
     response = call_ollama_with_memory(user_input)
+    r_lower = response.lower().strip()
 
-
-    if response == "#get_products":
+    if "#get_products" in r_lower:
         if not produits:
             return jsonify({"response": "❌ Aucun produit trouvé."})
-        
-        texte = "\n".join([
-            f"{p['nom']} - {p['prix']} MAD\n{p['description']}"
-            for p in produits
-        ])
-        texte += "\n\n👉 Souhaitez-vous passer une commande ? Si oui, indiquez le produit et la quantité."
-
+        texte = "\n".join([f"{p['nom']} - {p['prix']} MAD\n{p['description']}" for p in produits])
+        texte += "\n\n👉 Souhaitez-vous passer une commande ? Si oui, indiquez le produit et la quantité. ex('Je veux 15 Tiramissu')"
         return jsonify({"response": f"📋 Produits disponibles :\n\n{texte}"})
-    elif response.startswith("#add_to_cart:"):
+
+    elif "#add_to_cart:" in r_lower:
         try:
             parts = response.split(":")
-            if len(parts) != 3:
-                return jsonify({"response": "❌ Format invalide. Exemple attendu : #add_to_cart:Tiramisu:2"})
-
-            _, nom, quantite = parts
+            if len(parts) < 3:
+                raise ValueError("Format invalide")
+            nom, quantite = parts[1].strip(), int(parts[2].strip())
             produit = next((p for p in produits if p['nom'].lower() == nom.lower()), None)
             if not produit:
-                return jsonify({"response": f"❌ Produit '{nom}' introuvable dans le menu."})
-
-            quantite = int(quantite)
+                return jsonify({"response": f"❌ Produit '{nom}' introuvable."})
             existant = next((i for i in panier if i['produit_id'] == produit['id']), None)
             if existant:
                 existant["quantite"] += quantite
-                return jsonify({"response": f"🔄 Quantité mise à jour : {existant['quantite']} x {produit['nom']}"})
+                return jsonify({"response": f"🔄 Quantité mise à jour : {existant['quantite']} x {produit['nom']}"} )
             else:
                 panier.append({
                     "produit_id": produit["id"],
@@ -95,48 +115,63 @@ def chat():
                     "quantite": quantite,
                     "prix": float(produit["prix"])
                 })
-                return jsonify({"response": f"✅ Ajouté : {quantite} x {produit['nom']} au panier."})
-
+                return jsonify({"response": f"✅ Ajouté : {quantite} x {produit['nom']} au panier.\n\n📝 Si vous souhaitez confirmer votre commande, tapez : confirmer ma commande."})
         except Exception as e:
-            return jsonify({"response": f"❌ Erreur technique : {str(e)}"})
+            return jsonify({"response": f"❌ Erreur : {str(e)}"})
+    elif "show_reservation" in response.lower():
+        r = reservation_context["reservation"]
+        if not r:
+            return jsonify({"response": "ℹ️ Aucune donnée de réservation en cours."})
+        texte = "📋 Détails de la réservation en cours :\n"
+        texte += f"Nom : {r.get('nom', 'Non défini')}\n"
+        texte += f"Restaurant ID : {r.get('id_restaurant', 'Non défini')}\n"
+        texte += f"Personnes : {r.get('nbre_personnes', 'Non défini')}\n"
+        texte += f"Heure : {r.get('heure', 'Non défini')}\n"
+        texte += f"Jour : {r.get('jour', 'Non défini')}"
+        return jsonify({"response": texte})
 
-
-    elif response.startswith("#update_cart:"):
+    elif "#update_cart:" in r_lower:
         try:
-            _, nom, qte = response.split(":")
+            parts = response.split(":")
+            if len(parts) < 3:
+                raise ValueError("Format invalide")
+            nom, qte = parts[1].strip(), int(parts[2].strip())
             for item in panier:
                 if item["nom"].lower() == nom.lower():
-                    item["quantite"] = int(qte)
-                    return jsonify({"response": f"🔄 Quantité mise à jour : {qte} x {item['nom']}"})
+                    item["quantite"] = qte
+                    return jsonify({"response": f"🔄 Quantité mise à jour : {qte} x {item['nom']}"} )
             return jsonify({"response": "❌ Produit non trouvé dans le panier."})
         except:
-            return jsonify({"response": "❌ Erreur lors de la mise à jour du panier."})
+            return jsonify({"response": "❌ Erreur lors de la mise à jour du panier. \n\n📝 Si vous souhaitez confirmer votre commande, tapez : confirmer ma commande."})
 
-    elif response.startswith("#remove_from_cart:"):
-        _, nom = response.split(":")
-        panier[:] = [i for i in panier if i["nom"].lower() != nom.lower()]
-        return jsonify({"response": f"🗑️ {nom} retiré du panier."})
+    elif "#remove_from_cart:" in r_lower:
+        try:
+            nom = response.split(":")[1].strip()
+            panier[:] = [i for i in panier if i["nom"].lower() != nom.lower()]
+            return jsonify({"response": f"🗑️ {nom} retiré du panier."})
+        except:
+            return jsonify({"response": "❌ Format invalide pour la suppression. \n\n📝 Si vous souhaitez confirmer votre commande, tapez : confirmer ma commande."})
 
-    elif response == "#show_cart":
+    elif "#show_cart" in r_lower:
         if not panier:
             return jsonify({"response": "🛒 Votre panier est vide."})
-
-        texte_lignes = []
-        total = 0
+        lignes, total = [], 0
         for item in panier:
-            ligne_total = item["quantite"] * item["prix"]
-            texte_lignes.append(f"- {item['quantite']} x {item['nom']} ({item['prix']} MAD) = {ligne_total} MAD")
-            total += ligne_total
+            sous_total = item["quantite"] * item["prix"]
+            lignes.append(f"- {item['quantite']} x {item['nom']} ({item['prix']} MAD) = {sous_total} MAD")
+            total += sous_total
+        texte = "\n".join(lignes) + f"\n\n💰 Total général : {total} MAD"
+        return jsonify({"response": f"🛒 Contenu du panier :\n{texte}"})
 
-        texte_panier = "\n".join(texte_lignes)
-        texte_panier += f"\n\n💰 Total général : {total} MAD"
+    elif "#confirm_order" in r_lower:
+        if len(panier) < 1:
+            return jsonify({"response": "🛒 Votre panier est vide. Ajoutez des produits avant de confirmer votre commande."})
 
-        return jsonify({"response": f"🛒 Contenu du panier :\n{texte_panier}"})
+        donnees = {
+            "produits": [{"produit_id": i["produit_id"], "quantite": i["quantite"]} for i in panier],
+            "id": user_id
+        }
 
-    elif response == "#confirm_order":
-        donnees = {"produits": [{"produit_id": i["produit_id"], "quantite": i["quantite"]} for i in panier] , "id" : user_id}
-        print("📦 Données envoyées à Laravel :")
-        print(donnees)
         try:
             r = requests.post("http://127.0.0.1:8000/api/Commandes", json=donnees)
             r.raise_for_status()
@@ -145,8 +180,81 @@ def chat():
         except Exception as e:
             return jsonify({"response": f"❌ Erreur lors de l’envoi de la commande : {e}"})
 
-    else:
-        return jsonify({"response": response})
+    elif "#start_reservation" in r_lower:
+        try:
+            res = requests.get("http://127.0.0.1:8000/getRestaurants")
+            res.raise_for_status()
+            restaurants = res.json()
+            if not restaurants:
+                return jsonify({"response": "❌ Aucun restaurant disponible pour le moment."})
+            reservation_context.update({
+                "step": "choose_restaurant",
+                "restaurants": restaurants,
+                "reservation": {}
+            })
+            texte = "🍽️ Restaurants disponibles :\n" + "\n".join([f"{r['id']}. {r['nom']}" for r in restaurants])
+            texte += "\n\n👉 Entrez le **numéro** du restaurant choisi."
+            return jsonify({"response": texte})
+        except Exception as e:
+            return jsonify({"response": f"❌ Erreur récupération restaurants : {str(e)}"})
+
+    # Étapes de réservation
+    elif reservation_context["step"] == "choose_restaurant":
+        try:
+            restaurant_id = int(user_input.strip())
+            if not any(r["id"] == restaurant_id for r in reservation_context["restaurants"]):
+                return jsonify({"response": "❌ Restaurant non trouvé. ID invalide."})
+            reservation_context["reservation"]["id_restaurant"] = restaurant_id
+            reservation_context["step"] = "ask_name"
+            return jsonify({"response": "📝 Entrez votre nom complet."})
+        except:
+            return jsonify({"response": "❌ Veuillez entrer un ID valide."})
+
+    elif reservation_context["step"] == "ask_name":
+        reservation_context["reservation"]["nom"] = user_input.strip()
+        reservation_context["step"] = "ask_people"
+        return jsonify({"response": "👥 Combien de personnes ?"})
+
+    elif reservation_context["step"] == "ask_people":
+        try:
+            n = int(user_input.strip())
+            if n <= 0:
+                return jsonify({"response": "❌ Nombre de personnes invalide."})
+            reservation_context["reservation"]["nbre_personnes"] = n
+            reservation_context["step"] = "ask_time"
+            return jsonify({"response": "🕒 À quelle heure ? (ex : 20h)"})
+        except:
+            return jsonify({"response": "❌ Entrez un nombre valide."})
+
+    elif reservation_context["step"] == "ask_time":
+        reservation_context["reservation"]["heure"] = user_input.strip()
+        reservation_context["step"] = "ask_day"
+        return jsonify({"response": "📅 Pour quel jour ? (ex : 2025-05-13)"})
+
+    elif reservation_context["step"] == "ask_day":
+        reservation_context["reservation"]["jour"] = user_input.strip()
+        return confirm_reservation()
+
+    return jsonify({"response": response})
+
+def confirm_reservation():
+    global reservation_context
+    try:
+        data = reservation_context["reservation"]
+        r = requests.post("http://127.0.0.1:8000/api/Reservation", json=data)
+        r.raise_for_status()
+        msg = (
+            "✅ Réservation enregistrée !\n"
+            f"Nom : {data['nom']}\n"
+            f"Restaurant ID : {data['id_restaurant']}\n"
+            f"Personnes : {data['nbre_personnes']}\n"
+            f"Heure : {data['heure']}\n"
+            f"Jour : {data['jour']}"
+        )
+        reservation_context = {"step": None, "restaurants": [], "reservation": {}}
+        return jsonify({"response": msg})
+    except Exception as e:
+        return jsonify({"response": f"❌ Erreur enregistrement réservation : {str(e)}"})
 
 if __name__ == "__main__":
     app.run(debug=True)

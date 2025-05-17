@@ -57,7 +57,7 @@
             <label>Rôle :</label>
             <select name="role" class="form-control" required>
                 <option value="">-- Choisir un rôle --</option>
-                <option value="User" {{ old('role') == 'User' ? 'selected' : '' }}>User</option>
+                <option value="User" {{ old('role') == 'client' ? 'selected' : '' }}>client</option>
                 <option value="Admin" {{ old('role') == 'Admin' ? 'selected' : '' }}>Admin</option>
             </select>
         </div>

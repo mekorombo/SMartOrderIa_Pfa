@@ -45,7 +45,7 @@ const loadSavedChatHistory = () => {
         const responseHtml = `
         
            <div class="message__content">
-                <img class="message__avatar" src="assets/gemini.svg" alt="Gemini avatar">
+            <img class="message__avatar" src="assets/logo.svg" alt="Gemini avatar">
                 <p class="message__text"></p>
                 <div class="message__loading-indicator hide">
                     <div class="message__loading-bar"></div>
@@ -191,7 +191,7 @@ const displayLoadingAnimation = () => {
     const loadingHtml = `
 
         <div class="message__content">
-            <img class="message__avatar" src="assets/gemini.svg" alt="Gemini avatar">
+            <img class="message__avatar" src="assets/logo.svg" alt="Gemini avatar">
             <p class="message__text"></p>
             <div class="message__loading-indicator">
                 <div class="message__loading-bar"></div>
@@ -256,13 +256,24 @@ themeToggleButton.addEventListener('click', () => {
 // Clear all chat history
 clearChatButton.addEventListener('click', () => {
     if (confirm("Are you sure you want to delete all chat history?")) {
+        // Supprimer côté local
         localStorage.removeItem("saved-api-chats");
-
-        // Reload chat history to reflect changes
         loadSavedChatHistory();
 
         currentUserMessage = null;
         isGeneratingResponse = false;
+
+        // Supprimer côté serveur (Flask)
+        fetch("http://127.0.0.1:5000/reset", {
+            method: "POST"
+        })
+        .then(res => res.json())
+        .then(data => {
+            console.log(data.message); // Optionnel : log la réponse
+        })
+        .catch(err => {
+            console.error("Erreur lors de la réinitialisation du serveur :", err);
+        });
     }
 });
 

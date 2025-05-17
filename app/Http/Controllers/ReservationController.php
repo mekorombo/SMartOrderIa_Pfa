@@ -3,96 +3,71 @@
 namespace App\Http\Controllers;
 
 use App\Models\Reservation;
+use App\Models\Restaurant;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\Controller;
 
 class ReservationController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    // Affiche toutes les réservations
     public function index()
     {
-        //
+        $reservations = Reservation::latest()->paginate(10);
+        return view('reservations.index', compact('reservations'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    // Affiche le formulaire d'ajout
     public function create()
     {
-        //
+        $restaurants = Restaurant::all();
+        return view('reservations.create', compact('restaurants'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    
-    /**
-     * Display the specified resource.
-     */
-    public function show(Reservation $reservation)
-    {
-        //
-    }
+    // Enregistre une nouvelle réservation
     public function store(Request $request)
     {
-        DB::beginTransaction();
-        try {
-            // ✅ Validation des données
-            $validated = $request->validate([
-                'id_restaurant' => 'required|exists:restaurants,id',
-                'nom' => 'required|string|max:255',
-                'nbre_personnes' => 'required|integer|min:1',
-                'heure' => 'required|string',
-                'jour' => 'required|date',
-            ]);
-    
-            // 📌 Création de la réservation
-            $reservation = new Reservation();
-            $reservation->id_restaurant = $validated['id_restaurant'];
-            $reservation->nom = $validated['nom'];
-            $reservation->nbre_personnes = $validated['nbre_personnes'];
-            $reservation->heure = $validated['heure'];
-            $reservation->jour = $validated['jour'];
-            $reservation->save();
-    
-            DB::commit();
-            return response()->json([
-                'success' => true,
-                'message' => '✅ Réservation enregistrée avec succès.',
-                'data' => $reservation
-            ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => '❌ Erreur : ' . $e->getMessage()
-            ], 500);
-        }
-    }
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Reservation $reservation)
-    {
-        //
+        $request->validate([
+            'nom' => 'required|string|max:255',
+            'jour' => 'required|date',
+            'heure' => 'required',
+            'nbre_personnes' => 'required|integer|min:1',
+            'id_restaurant' => 'required|exists:restaurants,id',
+        ]);
+
+        Reservation::create($request->all());
+
+        return redirect()->route('reservations.index')->with('success', 'Réservation enregistrée avec succès.');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Reservation $reservation)
+    // Affiche le formulaire d'édition
+    public function show($id)
     {
-        //
+        $reservation = Reservation::findOrFail($id);
+        $restaurants = Restaurant::all();
+        return view('reservations.edit', compact('reservation', 'restaurants'));
+    }
+    // Met à jour la réservation
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'nom' => 'required|string|max:255',
+            'jour' => 'required|date',
+            'heure' => 'required',
+            'nbre_personnes' => 'required|integer|min:1',
+            'id_restaurant' => 'required|exists:restaurants,id',
+        ]);
+
+        $reservation = Reservation::findOrFail($id);
+        $reservation->update($request->all());
+
+        return redirect()->route('reservations.index')->with('success', 'Réservation mise à jour avec succès.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Reservation $reservation)
+    // Supprime une réservation
+    public function destroy($id)
     {
-        //
+        $reservation = Reservation::findOrFail($id);
+        $reservation->delete();
+
+        return redirect()->route('reservations.index')->with('success', 'Réservation supprimée.');
     }
 }

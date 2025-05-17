@@ -14,15 +14,7 @@ const signinButton = document.getElementById('signinButton');
 const signinPage = document.getElementById('signinPage');
 const closeIcon = document.getElementById('closeIcon');
 
-signinButton.addEventListener('click', function(){
-    signinPage.classList.remove('closeSignin');
-    signinPage.classList.add("openSignin")
-});
 
-closeIcon.addEventListener('click', function(){
-    signinPage.classList.remove("openSignin");
-    signinPage.classList.add('closeSignin');
-})
 
 // SIDEBAR ELEMENTS
 const sideBar = document.querySelector('.sidebar');
@@ -39,3 +31,58 @@ closeButton.addEventListener("click", function(){
     sideBar.classList.remove('open-sidebar')
     sideBar.classList.add('close-sidebar')
 })
+
+
+
+// SIGNIN PAGE OPEN AND CLOSE ANIMATION
+
+
+
+const RegisternButton = document.getElementById('RegisternButton');
+const RegisterPage = document.getElementById('RegisterPage');
+const closeIconR = document.getElementById('closeIconR');
+const signinButtonAlt = document.getElementById('signinButtonAlt');
+
+// SHOW SIGNIN FORM
+signinButton.addEventListener('click', function(){
+    signinPage.classList.remove('closeSignin');
+    signinPage.classList.add('openSignin');
+    RegisterPage.classList.remove('openSignin');
+    RegisterPage.classList.add('closeSignin');
+});
+
+// CLOSE SIGNIN FORM
+closeIcon.addEventListener('click', function(){
+    signinPage.classList.remove('openSignin');
+    signinPage.classList.add('closeSignin');
+});
+
+// SHOW REGISTER FORM
+RegisternButton.addEventListener('click', function(){
+    RegisterPage.classList.remove('closeSignin');
+    RegisterPage.classList.add('openSignin');
+    signinPage.classList.remove('openSignin');
+    signinPage.classList.add('closeSignin');
+});
+
+// CLOSE REGISTER FORM
+closeIconR.addEventListener('click', function(){
+    RegisterPage.classList.remove('openSignin');
+    RegisterPage.classList.add('closeSignin');
+});
+
+// BACK TO SIGNIN FROM REGISTER
+signinButtonAlt.addEventListener('click', function(){
+    signinPage.classList.remove('closeSignin');
+    signinPage.classList.add('openSignin');
+    RegisterPage.classList.remove('openSignin');
+    RegisterPage.classList.add('closeSignin');
+});
+const RegisternButtonAlt = document.getElementById('RegisternButtonAlt');
+
+RegisternButtonAlt.addEventListener('click', function(){
+    RegisterPage.classList.remove('closeSignin');
+    RegisterPage.classList.add('openSignin');
+    signinPage.classList.remove('openSignin');
+    signinPage.classList.add('closeSignin');
+});

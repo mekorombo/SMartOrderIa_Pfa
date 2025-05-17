@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\Jobs\SendEmailVerificationJob;
 
 class UserManagementController extends Controller
 {
@@ -13,7 +14,7 @@ class UserManagementController extends Controller
      */
     public function index()
     {
-        $users = User::all();
+        $users = User::paginate("10");
         return view('usermanagement.index', compact('users'));
     }
 
@@ -34,12 +35,11 @@ class UserManagementController extends Controller
         'name' => 'required|string|max:255',
         'email' => 'required|email|unique:users,email',
         'password' => 'required|min:6|confirmed',
-        'role' => 'required|in:User,Admin',
+        'role' => 'nullable',
         'phone' => 'nullable|numeric',
         'location' => 'nullable|string|max:255',
         'about_me' => 'nullable|string|max:500',
     ]);
-
     $user = new User();
     $user->name = $validatedData['name'];
     $user->email = $validatedData['email'];
@@ -50,7 +50,7 @@ class UserManagementController extends Controller
     $user->about_me = $validatedData['about_me'] ?? null;
 
     $user->save();
-
+    SendEmailVerificationJob::dispatch($user);
     return redirect()->route('user-management.index')->with('success', 'Utilisateur créé avec succès.');
 }
 /**
