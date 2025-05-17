@@ -74,23 +74,8 @@ def chat():
 
     elif user_input.lower() == "valider" and context['intent'] == 'commande' and pending_products:
         pending_products = False
-        total = sum(item['quantite'] * item['prix'] for item in panier)
-        try:
-            cursor.execute("INSERT INTO commandes (user_id, total, created_at) VALUES (%s, %s, %s)", (1, total, datetime.now()))
-            commande_id = cursor.lastrowid
-            for item in panier:
-                cursor.execute("INSERT INTO produit_commandes (commande_id, produit_id, qte) VALUES (%s, %s, %s)", (commande_id, item['id'], item['quantite']))
-                cursor.execute("UPDATE produits SET qte = qte - %s WHERE id = %s", (item['quantite'], item['id']))
-                db.commit()
-            response += f"✅ Commande enregistrée avec succès :\n"
-            for item in panier:
-                response += f"- {item['quantite']} x {item['nom']} = {item['quantite'] * item['prix']:.2f} MAD\n"
-            response += f"💰 Total : {total:.2f} MAD"
-            context = {'intent': None, 'name': None, 'time': None, 'products': [], 'people': None, 'restaurant': None}
-            panier.clear()
-            expected_field = None
-        except Exception as e:
-            response += f"❌ Erreur lors de l'enregistrement : {e}"
+        expected_field = 'time'
+        response += "Pour quelle heure souhaitez-vous récupérer la commande ?"
 
     elif "voir" in user_input.lower() or "consulter" in user_input.lower():
         nom_recherche = re.search(r"au nom de ([a-zA-ZÀ-ÿ\s'-]+)", user_input.lower())
@@ -143,29 +128,13 @@ def chat():
                 heures = int(match.group(1))
                 minutes = int(match.group(2)) if match.group(2) else 0
                 context['time'] = f"{heures:02d}:{minutes:02d}:00"
-
+                expected_field = 'name'
                 if context['intent'] == 'commande':
-                    # Envoie directe de la commande sans demander le nom
-                    heure = context['time']
-                    total = sum(item['quantite'] * item['prix'] for item in panier)
-                    cursor.execute("INSERT INTO commandes (user_id, total, created_at) VALUES (%s, %s, %s)", (1, total, datetime.now()))
-                    commande_id = cursor.lastrowid
-                    for item in panier:
-                        cursor.execute("INSERT INTO commandes_produits (commande_id, produit_id, quantite) VALUES (%s, %s, %s)", (commande_id, item['id'], item['quantite']))
-                        cursor.execute("UPDATE produits SET qte = qte - %s WHERE id = %s", (item['quantite'], item['id']))
-                    db.commit()
-                    response += f"✅ Commande enregistrée pour {heure} :\n"
-                    for item in panier:
-                        response += f"- {item['quantite']} x {item['nom']} = {item['quantite'] * item['prix']:.2f} MAD\n"
-                    response += f"💰 Total : {total:.2f} MAD"
-                    context = {'intent': None, 'name': None, 'time': None, 'products': [], 'people': None, 'restaurant': None}
-                    panier.clear()
-                    expected_field = None
+                    response += "À quel nom dois-je enregistrer la commande ?"
                 else:
-                    expected_field = 'name'
                     response += "À quel nom dois-je faire la réservation ?"
             else:
-                return jsonify({'response': "🕒 Pour quelle heure ? (ex: 20h ou 19h30)"})
+                response += "Pour quelle heure ? (ex: 20h ou 19h30)"
 
         elif expected_field == 'name':
             name = re.sub(r"(au nom de|c'est|c est|pour|s'il vous plaît)", "", user_input, flags=re.I).strip()
@@ -173,17 +142,9 @@ def chat():
                 context['name'] = name.title()
                 if context['intent'] == 'reservation':
                     expected_field = 'restaurant'
-                    response += "Dans quel restaurant souhaitez-vous réserver ?\n"
-                    cursor.execute("SELECT id, nom FROM restaurants")
-                    restaurants = cursor.fetchall()
-                    if restaurants:
-                        response += "🍽️ Voici les restaurants disponibles :\n"
-                        for r in restaurants:
-                            response += f"{r[0]}. {r[1]}\n"
-                    else:
-                        response += "❌ Aucun restaurant trouvé."
+                    response += "Dans quel restaurant souhaitez-vous réserver ?"
                 else:
-                    expected_field = None
+                    expected_field = None  # commande
             else:
                 response += "Quel est le nom ?"
 
@@ -227,20 +188,11 @@ def chat():
             expected_field = None
 
     elif context['intent'] is None:
-        r_lower = user_input.lower()
-        if "command" in r_lower or "commander" in r_lower:
+        if "command" in user_input:
             context['intent'] = 'commande'
             expected_field = 'product'
-            cursor.execute("SELECT nom, prix, description FROM produits")
-            produits = cursor.fetchall()
-            if produits:
-                response += "📋 Voici les produits disponibles :\n"
-                for nom, prix, desc in produits:
-                    response += f"- {nom} ({prix:.2f} MAD)\n  {desc}\n"
-                response += "\n👉 Que souhaitez-vous commander ? (ex: 2 pizza margherita)"
-            else:
-                response += "❌ Aucun produit disponible pour le moment."
-        elif any(mot in r_lower for mot in ["reserv", "réserv", "réserver", "reservation", "faire une réservation", "réserver une table", "table"]):
+            response += "Que souhaitez-vous commander ? (ex: 2 pizza margherita)"
+        elif "reserv" in user_input or "table" in user_input:
             context['intent'] = 'reservation'
             expected_field = 'people'
             response += "D'accord, pour combien de personnes ?"
@@ -276,4 +228,3 @@ def chat():
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001)
-
