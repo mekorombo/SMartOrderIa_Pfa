@@ -12,7 +12,7 @@
 
 <body>
     <nav class="navbar">
-        <h3 class="navbar__logo">SMARORDERAI</h3>
+        <a href="/">        <h3 class="navbar__logo">SMARORDERAI</h3></a>
         <button class="navbar__button" id="themeToggler"><i class='bx bx-sun'></i></button>
     </nav>
 

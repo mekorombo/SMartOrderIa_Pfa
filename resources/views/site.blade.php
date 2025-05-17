@@ -21,12 +21,12 @@
                 <h1>SMARORDERAI</h1>
             </div>
 
-            <ul>
+            {{-- <ul>
                 <li><a href="#">FRATURES</a></li>
                 <li><a href="#">PRICING</a></li>
                 <li><a href="#">HOW TO USE</a></li>
                 <li><a href="#">RODEMAP</a></li>
-            </ul>
+            </ul> --}}
             
             <div class="head-right">
                 @php
